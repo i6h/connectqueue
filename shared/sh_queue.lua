@@ -535,21 +535,20 @@ local function playerConnect(name, setKickReason, deferrals)
             
             deferrals.update(Config.Language.whitelist.checkingRoles)
             -- deferrals.update(Config.Language..connecting)
-            PerformHttpRequest("https://discord.com/api/v9/guilds/"..Config.discordServerGuild.."/members".."/"..string.sub(currentDiscordID, 9), function (errorCode, rdata, resultHeaders)
-                local res=json.decode(rdata)
+            PerformHttpRequest("https://discord.com/api/v10/guilds/"..Config.discordServerGuild.."/members/"..string.sub(currentDiscordID, 9), function (errorCode, rdata, resultHeaders)
+                local res = json.decode(rdata)
                 if errorCode == 200 then
                     local roles = json.encode(res.roles)
-    
+            
                     for key, roleData in pairs(Config.Roles) do
-                        if string.find(roles,roleData.roleID) then
+                        if string.find(roles, roleData.roleID) then
                             print(roleData.point)
                             point = point + roleData.point
                             RoleStrings = RoleStrings .. key .." ,"
                         end
                     end
-    
                 end
-            end, "GET", "", {["Content-type"] = "application/json", ["Authorization"] = "Bot " .. Config.discordBotToken})
+            end, "GET", "", {["Content-type"] = "application/json", ["Authorization"] = "Bot " .. Config.discordBotToken})            
             Wait(1000)
     
             
@@ -824,9 +823,9 @@ if Config.DisableHardCap then
         if resource == "hardcap" then CancelEvent() return end
 
         if Config.enableDiscordWhitelist then
-            PerformHttpRequest("https://discord.com/api/v9/guilds/"..Config.discordServerGuild, function (errorCode, resultData, resultHeaders)
+            PerformHttpRequest("https://discord.com/api/v10/guilds/"..Config.discordServerGuild, function (errorCode, resultData, resultHeaders)
                 if errorCode == 200 then
-                    PerformHttpRequest("https://discord.com/api/v9/guilds/"..Config.discordServerGuild.."/preview", function (errorCode, rdata, resultHeaders)
+                    PerformHttpRequest("https://discord.com/api/v10/guilds/"..Config.discordServerGuild.."/preview", function (errorCode, rdata, resultHeaders)
                         local res=json.decode(rdata)
                         if errorCode == 200 then
                             if not announce then

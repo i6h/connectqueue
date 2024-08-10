@@ -1,65 +1,68 @@
-# ConnectQueue
----
-Easy to use queue system for FiveM with:
-- Simple API
-- Priority System
-- Config
-    - Ability for whitelist only
-    - Require steam
-    - Language options
+# 🚀 ConnectQueue
 
-**Please report any bugs on the release thread [Here](https://forum.fivem.net/t/alpha-connectqueue-a-server-queue-system-fxs/22228) or through [GitHub](https://github.com/Nick78111/ConnectQueue/issues).**
+A lightweight and easy-to-use queue system for FiveM, packed with features:
 
-## How to install
----
-- Drop the folder inside your resources folder.
-- Add `start connectqueue` inside your server.cfg. - *Preferrably at the top*
-- Set convars to your liking.
-- Open `connectqueue/server/sv_queue_config.lua` and edit to your liking.
-- Renaming the resource may cause problems.
+- 🛠️ **Simple API** for seamless integration
+- 🏅 **Priority System** to manage player queues efficiently
+- ⚙️ **Extensive Configuration Options**:
+  - 🔒 Whitelist-only mode
+  - 🎮 Steam requirement
+  - 🌐 Multiple language support
+- 💬 **Supports the latest Discord API** for robust and up-to-date integration
 
-## ConVars
----
-	set sv_debugqueue true # prints debug messages to console
-	set sv_displayqueue true # shows queue count in the server name '[count] server name'
+🐞 **Please report any bugs via the [GitHub Issues](https://github.com/i6h/connectqueue/issues).**
 
-## How to use / Examples
----
-To use the API add `server_script "@connectqueue/connectqueue.lua"` at the top of the `__resource.lua` file in question.
-I would also suggest adding `dependency "connectqueue"` to it aswell.
-You may now use any of the functions below, anywhere in that resource.
+## 📥 Installation
 
-### OnReady
-This is called when the queue functions are ready to be used.
-```Lua
-    Queue.OnReady(function() 
-        print("HI")
-    end)
+1. 📂 Extract the folder into your `resources` directory.
+2. 📜 Add `start connectqueue` to your `server.cfg` (preferably at the top).
+3. 🔧 Configure ConVars as needed.
+4. ✏️ Open `connectqueue/server/sv_queue_config.lua` and customize it to your needs.
+
+> **Note:** Renaming the resource folder may cause issues.
+
+## 🔧 ConVars
+
+Set the following ConVars in your `server.cfg`:
+
+```bash
+set sv_debugqueue true    # Enables debug messages in the console
+set sv_displayqueue true  # Displays the queue count in the server name '[count] server name'
 ```
-All of the functions below must be called **AFTER** the queue is ready.
 
-### OnJoin
-This is called when a player tries to join the server.
-Calling `allow` with no arguments will let them through.
-Calling `allow` with a string will prevent them from joining with the given message.
-`allow` must be called or the player will hang on connecting...
-```Lua
-Queue.OnJoin(function(source, allow)
-    allow("No, you can't join")
+## 🛠️ Usage and Examples
+
+### 🚦 OnReady
+
+This event is triggered when the queue functions are ready to be used.
+
+```lua
+Queue.OnReady(function() 
+    print("Queue system is ready!")
 end)
 ```
 
-## AddPriority
-Call this to add an identifier to the priority list.
-The integer is how much power they have over other users with priority.
-This function can take a table of ids or individually.
-```Lua
--- individual
+### 🚪 OnJoin
+
+This event is triggered when a player attempts to join the server. The `allow` function controls their access. If `allow` is called with a string, the player is denied entry with the given message.
+
+```lua
+Queue.OnJoin(function(source, allow)
+    allow("Sorry, you cannot join at this time.")
+end)
+```
+
+### 🎟️ AddPriority
+
+Adds a player identifier to the priority list with a specified power level, either individually or in a table.
+
+```lua
+-- Individual priority
 Queue.AddPriority("STEAM_0:1:33459672", 100)
 Queue.AddPriority("steam:110000103fd1bb1", 10)
 Queue.AddPriority("ip:127.0.0.1", 25)
 
--- table
+-- Multiple priorities
 local prioritize = {
     ["STEAM_0:1:33459672"] = 100,
     ["steam:110000103fd1bb1"] = 10,
@@ -68,53 +71,67 @@ local prioritize = {
 Queue.AddPriority(prioritize)
 ```
 
-## RemovePriority
-Removes priority from a user.
-```Lua
+### ❌ RemovePriority
+
+Removes priority from a player.
+
+```lua
 Queue.RemovePriority("STEAM_0:1:33459672")
 ```
 
-## IsReady
-Will return whether or not the queue's exports are ready to be called.
-```Lua
+### ✅ IsReady
 
+Checks if the queue's exports are ready to be used.
+
+```lua
 print(Queue.IsReady())
 ```
 
-## Other Queue Functions
-You can call every queue function within sh_queue.lua.
-```Lua
+### 🔍 Other Queue Functions
+
+Access various queue functions via `sh_queue.lua`.
+
+```lua
 local ids = Queue.Exports:GetIds(src)
 
--- sets the player to position 1 in queue
+-- Set player to position 1 in the queue
 Queue.Exports:SetPos(ids, 1)
--- returns whether or not the player has any priority
+-- Check if the player has any priority
 Queue.Exports:IsPriority(ids)
---- returns size of queue
+-- Get the current queue size
 Queue.Exports:GetSize()
--- plus many more...
+-- And more...
 ```
 
+## 🛡️ Discord Whitelist and Role Priority
 
-## Discord Whitelist And Role Priority
-To Enable Discord Whitelist You need to Update server -> sv_queue_config.lua line 71 To 85
+To enable Discord Whitelist with support for the latest Discord API, update `sv_queue_config.lua` (lines 71 to 85) in the `server` directory:
 
-```Lua
-Config.enableDiscordWhitelist = false -- For Enable Whitelist System
-Config.discordServerGuild = "" -- Discord Server ID to check it if player is in the server
-Config.discordBotToken = ""  -- Discord Token Bot - You Can Create at https://discord.com/developers/applications
-
+```lua
+Config.enableDiscordWhitelist = true -- Enable Discord whitelist system
+Config.discordServerGuild = ""       -- Discord Server ID to check membership
+Config.discordBotToken = ""          -- Discord Bot Token, create at https://discord.com/developers/applications
 
 Config.Roles = {
-	member = {
-		roleID = "", --Role ID
-		point = 15,  -- any bigger point can push player on the first row of queue
-	},
+    member = {
+        roleID = "",  -- Role ID
+        point = 15,   -- Queue priority points (higher points move the player up in the queue)
+    },
     vip = {
-		roleID = "", --Role ID
-		point = 20,  -- any bigger point can push player on the first row of queue
-	},
-
+        roleID = "",  -- Role ID
+        point = 20,   -- Queue priority points (higher points move the player up in the queue)
+    },
 }
-
 ```
+
+## 🤖 Discord Priority Bot
+
+Manage player queue priorities with our Discord Priority Bot. Automatically assign or remove roles with seamless ConnectQueue integration.
+
+🔗 **Get it here:** [Discord Priority Bot](https://github.com/i6h/priority-bot)
+
+## Acknowledgments 🌟
+
+A big thank you to the Nick78111 for their work on the original project! 🙌 This repository is forked from [Re2team/connectqueue](https://github.com/Re2team/connectqueue/). 🚀
+
+
