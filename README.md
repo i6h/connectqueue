@@ -87,6 +87,47 @@ Checks if the queue's exports are ready to be used.
 print(Queue.IsReady())
 ```
 
+### 🛡️ GetPlayerRole
+
+This export function allows you to retrieve the current role of a player in the game, based on their Discord ID.
+
+```lua
+-- Using player src (server ID)
+local role, points = exports.connectqueue:GetPlayerRole(1) -- assuming '1' is a valid player src
+if role then
+    print("Player's Role: " .. role)
+    print("Role Points: " .. points)
+else
+    print("Role not found or invalid player src.")
+end
+
+-- Using Discord ID
+local role, points = exports.connectqueue:GetPlayerRole("discord:320015606071951360")
+if role then
+    print("Player's Role: " .. role)
+    print("Role Points: " .. points)
+else
+    print("Role not found or invalid Discord ID.")
+end
+
+```
+- as command
+    ```lua
+    RegisterCommand("checkrole", function(source, args, rawCommand)
+        local targetPlayer = tonumber(args[1])
+        if not targetPlayer then
+            print("You must specify a player ID.")
+            return
+        end
+
+        local role, points = exports.connectqueue:GetPlayerRole(targetPlayer)
+        if role then
+            print("Player " .. targetPlayer .. " has the role: " .. role .." "..points)
+        else
+            print("Could not retrieve the role for player " .. targetPlayer)
+        end
+    end, false)
+    ```
 ### 🔍 Other Queue Functions
 
 Access various queue functions via `sh_queue.lua`.
@@ -132,6 +173,8 @@ Manage player queue priorities with our Discord Priority Bot. Automatically assi
 
 ## Acknowledgments 🌟
 
-A big thank you to the Nick78111 for their work on the original project! 🙌 This repository is forked from [Re2team/connectqueue](https://github.com/Re2team/connectqueue/). 🚀
+A big thank you to **Nick78111** for their work on the original project! 🙌 This repository is forked from [Re2team/connectqueue](https://github.com/Re2team/connectqueue/). 🚀
 
+### Special Thanks
 
+Thanks to [KamiSensei](https://forum.cfx.re/t/free-connectqueue-discord-priority-bot/5258282/6?u=its4lion) for suggesting the `GetPlayerRole` export. 🙌

@@ -457,6 +457,60 @@ exports("GetQueueExports", function()
     return Queue
 end)
 
+function GetPlayerRole(identifier)
+    local discordID = nil
+    if not Config.enableDiscordWhitelist then
+        print("enableDiscordWhitelist is disabled")
+        return nil, "enableDiscordWhitelist is disabled"
+    end
+    -- If identifier is a player src (number), get their identifiers and find the Discord ID
+    if type(identifier) == "number" then
+        local ids = GetPlayerIdentifiers(identifier)
+        for _, id in ipairs(ids) do
+            if string.sub(id, 1, string.len("discord:")) == "discord:" then
+                discordID = id
+                break
+            end
+        end
+    elseif type(identifier) == "string" and string.sub(identifier, 1, string.len("discord:")) == "discord:" then
+        -- If identifier is already a Discord ID
+        discordID = identifier
+    end
+
+    if not discordID then
+        return nil, "No valid Discord ID found"
+    end
+
+    local roleData = nil
+    PerformHttpRequest("https://discord.com/api/v10/guilds/" .. Config.discordServerGuild .. "/members/" .. string.sub(discordID, 9), function(errorCode, rdata, resultHeaders)
+        if errorCode == 200 then
+            local res = json.decode(rdata)
+            local roles = json.encode(res.roles)
+            
+            for key, roleConfig in pairs(Config.Roles) do
+                if string.find(roles, roleConfig.roleID) then
+                    roleData = {role = key, points = roleConfig.point}
+                    break
+                end
+            end
+        end
+    end, "GET", "", {["Content-type"] = "application/json", ["Authorization"] = "Bot " .. Config.discordBotToken})
+
+    while roleData == nil do
+        Citizen.Wait(0)
+    end
+
+    if roleData then
+        return roleData.role, roleData.points
+    else
+        return nil, "Role not found"
+    end
+end
+
+exports("GetPlayerRole", function(identifier)
+    return GetPlayerRole(identifier)
+end)
+
 local function playerConnect(name, setKickReason, deferrals)
     local src = source
     local ids = Queue:GetIds(src)
